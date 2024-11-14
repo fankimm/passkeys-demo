@@ -11,8 +11,11 @@
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.16.1",
+    "@simplewebauthn/server": "^11.0.0",
     "@uiw/react-codemirror": "^4.21.9",
     "antd": "^5.7.3",
+    "cbor": "^9.0.2",
+    "cose-to-jwk": "^1.1.0",
     "dayjs": "^1.11.9",
     "framer-motion": "^10.15.0",
     "ky": "^0.33.3",

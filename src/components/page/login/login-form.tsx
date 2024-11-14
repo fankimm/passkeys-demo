@@ -21,7 +21,8 @@ const LoginForm = () => {
 
     try {
       console.log(value);
-      await signIn("login-credentials", { username: value.username, password: value.password });
+      const res = await signIn("login-credentials", { username: value.username, password: value.password });
+      console.log("res", res);
     } catch (error) {
       setIsLoading(false);
     }
