@@ -1,3 +1,4 @@
+import { arrayBufferToBase64, base64ToArrayBuffer } from "@/components/layout/profile";
 import DefaultModal from "@/components/shared/ui/default-modal";
 import { Alert, Button, Form, Input } from "antd";
 import { useForm } from "antd/lib/form/Form";
@@ -15,6 +16,68 @@ const LoginForm = () => {
   const [form] = useForm<ILoginFormValue>();
   const [isLoading, setIsLoading] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const prepareCredentialForVerification = (assertion: PublicKeyCredential) => {
+    const response = assertion.response as AuthenticatorAssertionResponse;
+    return {
+      id: assertion.id,
+      rawId: arrayBufferToBase64(assertion.rawId),
+      type: assertion.type,
+      response: {
+        clientDataJSON: arrayBufferToBase64(response.clientDataJSON),
+        authenticatorData: arrayBufferToBase64(response.authenticatorData),
+        signature: arrayBufferToBase64(response.signature),
+        userHandle: response.userHandle ? arrayBufferToBase64(response.userHandle) : null,
+      },
+    };
+  };
+  const loginWithPasskey = () => {
+    form.validateFields().then(async (values) => {
+      try {
+        // Request a challenge from the server for login
+        const loginOptionsResponse = await fetch("/api/passkeys/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ action: "loginOptions", userId: values.username }),
+        });
+        const loginOptions = await loginOptionsResponse.json();
+
+        // Convert the server response from Base64 into ArrayBuffers
+        loginOptions.challenge = base64ToArrayBuffer(loginOptions.challenge);
+
+        // Use the Web Authentication API to get the credential
+        const assertion = await navigator.credentials.get({
+          publicKey: loginOptions,
+        });
+
+        if (!assertion) {
+          return;
+        }
+
+        // Prepare the credential information to be sent to the server
+        const credential = prepareCredentialForVerification(assertion as PublicKeyCredential);
+        console.log("credential", credential);
+        // Send the credential to the server for verification
+        const verificationResponse = await fetch("/api/passkeys/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "verifyCredential",
+            userId: values.username,
+            credential,
+          }),
+        });
+
+        const verificationResult = await verificationResponse.json();
+        console.log("verificationResult", verificationResult);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  };
 
   const handleFinish = useCallback(async (value: ILoginFormValue) => {
     setIsLoading(true);
@@ -100,6 +163,16 @@ const LoginForm = () => {
         </a>
       </Form>
 
+      <Button
+        size="large"
+        type="primary"
+        htmlType="submit"
+        className="w-full"
+        loading={isLoading}
+        onClick={loginWithPasskey}
+      >
+        패스키로 로그인
+      </Button>
       <DefaultModal title="비밀번호 찾기" open={showPasswordModal} handleHide={() => setShowPasswordModal(false)}>
         🔑 임시 로그인 정보는 admin / admin 입니다.
       </DefaultModal>

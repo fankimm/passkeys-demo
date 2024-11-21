@@ -4,27 +4,25 @@ import { ChevronDown, KeyRound, LogOut, User } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import React, { useCallback } from "react";
-
+export const base64ToArrayBuffer = (base64: string) => {
+  const binaryString = window.atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+};
+export const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
+  return btoa(String.fromCharCode.apply(null, new Uint8Array(buffer) as any));
+};
 const Profile = () => {
   const { session } = useAuth();
-  console.log("session", session);
-  const base64ToArrayBuffer = (base64: string) => {
-    const binaryString = window.atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes.buffer;
-  };
-  const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
-    return btoa(String.fromCharCode.apply(null, new Uint8Array(buffer) as any));
-  };
+
   const handleRegister = async () => {
     try {
       // Step 1: Request registration options from the server
-      console.log("step2");
-      const registerOptionsResponse = await fetch("/api/register", {
+      const registerOptionsResponse = await fetch("/api/passkeys/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "registerOptions", userId: session.user.login }),
@@ -49,9 +47,9 @@ const Profile = () => {
         },
         type: newCredential.type,
       };
-      console.log("step3");
+      console.log("step3", credential);
       // Step 3: Register the credential with the server
-      const registerResponse = await fetch("/api/register", {
+      const registerResponse = await fetch("/api/passkeys/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

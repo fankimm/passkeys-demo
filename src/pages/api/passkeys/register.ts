@@ -2,7 +2,6 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import {
   compareChallenges,
   db,
-  deleteChallenge,
   destructClientDataJSON,
   generateChallenge,
   getChallenge,
@@ -73,7 +72,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       saveCredential(userId, { id: credential.id, pubKey: pubKeyJWK });
-      deleteChallenge(userId);
+      //TODO
+      // deleteChallenge(userId);
 
       console.log("db:", db);
       res.status(200).json({ success: true });
