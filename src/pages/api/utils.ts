@@ -23,10 +23,17 @@ const db = {
 const saveChallenge = (userId: string, challenge: string) => db.challenges.set(userId, challenge);
 const getChallenge = (userId: string): string | undefined => db.challenges.get(userId);
 const deleteChallenge = (userId: string) => db.challenges.delete(userId);
-const saveCredential = (userId: string, credential: Credential) => db.credentials.set(userId, credential);
+const saveCredential = (userId: string, credential: Credential) => {
+  console.log("saveCredential", userId, credential);
+  return db.credentials.set(userId, credential);
+};
 const getCredential = (userId: string) => db.credentials.get(userId);
 
-const generateChallenge = (): string => randomBytes(32).toString("base64");
+const generateChallenge = (): string => {
+  const random = randomBytes(32).toString("base64");
+  console.log("random", random);
+  return random;
+};
 
 const verifyRegistration = async (attestationObject: Buffer, clientDataJSON: Buffer) => {
   const decodedAttestationObject = await cbor.decodeFirst(attestationObject);

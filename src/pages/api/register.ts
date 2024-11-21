@@ -42,6 +42,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     };
 
+    console.log("db:", db);
+
     res.status(200).json(registerOptions);
   } else if (action === "registerCredential") {
     const attObj = Buffer.from(credential.response.attestationObject, "base64");
@@ -73,6 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       saveCredential(userId, { id: credential.id, pubKey: pubKeyJWK });
       deleteChallenge(userId);
 
+      console.log("db:", db);
       res.status(200).json({ success: true });
     } catch (error) {
       console.log(error);
@@ -82,5 +85,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(400).json({ error: "Invalid action" });
   }
 
-  console.log(db);
+  console.log("dbbb", db);
 }

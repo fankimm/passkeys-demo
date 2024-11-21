@@ -4,6 +4,7 @@ import CalendarSample from "@/components/page/index/calendar-sample";
 import StatisticSample from "@/components/page/index/statistic-sample";
 import { useAuth } from "@/lib/auth/auth-provider";
 import { Alert, Divider, Skeleton } from "antd";
+import { useEffect } from "react";
 
 const pageHeader: IPageHeader = {
   title: "Welcome",
@@ -12,6 +13,12 @@ const pageHeader: IPageHeader = {
 const IndexPage: IDefaultLayoutPage = () => {
   const { session } = useAuth();
   const { data, error } = useDashboard();
+
+  useEffect(() => {
+    const data = fetch("/api/get-credential").then((res) => res.json());
+
+    // console.log("data: ")
+  }, []);
 
   return (
     <>
